@@ -2,7 +2,7 @@
 
 A robust, production-ready full-stack Expense Tracker built to gracefully handle real-world network instability, ensure strict financial data correctness, and provide a seamless user experience.
 
-> **Live Deployment:** [Insert Live App URL Here]
+> **Live Deployment:** [https://expense-tracker-three-blush-85.vercel.app/](https://expense-tracker-three-blush-85.vercel.app/)
 
 ---
 
@@ -88,3 +88,4 @@ Given the strict timebox constraints, I prioritized deep engineering rigor (data
 **Things I intentionally did NOT do:**
 1. **Pagination:** I intentionally excluded infinite scrolling or page chunking for the `GET /expenses` route to focus entirely on robust caching and exact idempotency logic.
 2. **Complex Summary Views / Charts:** While a "Total per Category" summary or pie chart is a "Nice to Have", I opted instead to polish the core table UI and implement a highly reliable "Total Expenses" metric for the currently visible list.
+3. **Update & Delete Expenses:** I explicitly omitted PUT and DELETE routes to adhere to the timebox, focusing purely on perfect data ingestion (POST) and retrieval (GET).
