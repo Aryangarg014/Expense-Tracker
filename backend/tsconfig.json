@@ -1,0 +1,36 @@
+{
+  "compilerOptions": {
+    /* Target modern Node.js */
+    "target": "ES2020",
+    "module": "commonjs",
+    "lib": ["ES2020"],
+
+    /* Output directory for compiled JS */
+    "outDir": "./dist",
+    "rootDir": "./src",
+
+    /* Strict type checking — catches real bugs at compile time */
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Allow default imports from modules without a default export */
+    "allowSyntheticDefaultImports": true,
+
+    /* Allows importing JSON files directly in TypeScript */
+    "resolveJsonModule": true,
+
+    /* Include source maps for easier debugging */
+    "sourceMap": true,
+
+    /* Decorators — used by some Mongoose/class-based patterns */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* Explicitly include Node.js global types (process, console, __dirname etc.) */
+    "types": ["node"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
+}
