@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import Expense, { IExpense } from '../models/Expense';
 import { AppError } from '../utils/AppError';
+import redis from '../config/redis';
 
 // ─── CreateExpenseBody DTO ────────────────────────────────────────────────────
 interface CreateExpenseBody {
@@ -61,6 +62,17 @@ export const createExpense = async (
       idempotencyKey,
     });
 
+    // CRITICAL: Invalidate the user's expense cache so the new item shows up
+    // We scan or delete keys matching `expenses:${userId}:*`
+    try {
+      const keys = await redis.keys(`expenses:${userId}:*`);
+      if (keys.length > 0) {
+        await redis.del(...keys);
+      }
+    } catch (redisErr) {
+      console.error('Failed to invalidate cache:', redisErr);
+    }
+
     res.status(201).json({
       status: 'success',
       data: { expense: newExpense },
@@ -83,6 +95,27 @@ export const getExpenses = async (
     const userId = req.user!._id;
     const { category, sort } = req.query;
 
+    // Define a unique cache key based on the user and their exact query parameters
+    const cacheKey = `expenses:${userId}:cat_${category || 'all'}:sort_${sort || 'date_desc'}`;
+
+    try {
+      // 1. Try to fetch from Redis Cache
+      const cachedExpenses = await redis.get(cacheKey);
+      
+      if (cachedExpenses) {
+        res.status(200).json({
+          status: 'success',
+          results: JSON.parse(cachedExpenses).length,
+          source: 'cache',
+          data: { expenses: JSON.parse(cachedExpenses) },
+        });
+        return;
+      }
+    } catch (redisErr) {
+      console.error('Redis GET error:', redisErr);
+      // Fallback to database if Redis fails
+    }
+
     // Build the query object
     const filter: any = { user: userId };
     
@@ -96,13 +129,25 @@ export const getExpenses = async (
     // Apply Sorting
     if (sort === 'date_desc') {
       query = query.sort({ date: -1 }); // Newest first
+    } else if (sort === 'date_asc') {
+      query = query.sort({ date: 1 }); // Oldest first
+    } else {
+      query = query.sort({ date: -1 }); // Default to Newest first
     }
 
     const expenses = await query;
 
+    // 2. Save result to cache (expires in 10 minutes)
+    try {
+      await redis.set(cacheKey, JSON.stringify(expenses), 'EX', 600);
+    } catch (redisErr) {
+      console.error('Redis SET error:', redisErr);
+    }
+
     res.status(200).json({
       status: 'success',
       results: expenses.length,
+      source: 'database',
       data: { expenses },
     });
   } catch (error) {

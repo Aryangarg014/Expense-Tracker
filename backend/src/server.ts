@@ -4,6 +4,7 @@ import 'dotenv/config';
 import express, { Application, Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import rateLimit from 'express-rate-limit';
 
 import connectDB from './config/db';
 import { globalErrorHandler } from './middleware/errorHandler';
@@ -16,9 +17,26 @@ import expenseRouter from './routes/expenses';
 const app: Application = express();
 const PORT = parseInt(process.env.PORT ?? '5000', 10);
 
-// ─── Security Middleware ──────────────────────────────────────────────────────
-// helmet() sets ~15 HTTP security headers in one call (XSS, clickjacking etc.)
+// ─── Security & Rate Limiting Middleware ──────────────────────────────────────
 app.use(helmet());
+
+// Realistic General API Limit: 100 requests per 15 minutes
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  message: { status: 'fail', message: 'Too many requests, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Realistic Auth Limit: 20 requests per 15 minutes to prevent brute force
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  message: { status: 'fail', message: 'Too many login attempts, please try again later.' },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // cors() allows the Vite frontend (port 5173) to call this API cross-origin
 app.use(
@@ -41,8 +59,8 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/health', healthRouter);
-app.use('/api/auth', authRouter);
-app.use('/api/expenses', expenseRouter);
+app.use('/api/auth', authLimiter, authRouter);
+app.use('/api/expenses', apiLimiter, expenseRouter);
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
 // Express 5 requires named wildcards in path patterns
