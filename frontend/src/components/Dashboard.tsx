@@ -40,7 +40,6 @@ const Dashboard = () => {
   const { user, logout } = useContext(AuthContext);
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState('');
   
   // Filter & Sort state
   const [filterCategory, setFilterCategory] = useState('All Categories');
@@ -48,7 +47,6 @@ const Dashboard = () => {
 
   const fetchExpenses = useCallback(async () => {
     setIsLoading(true);
-    setError('');
     try {
       let query = `/expenses?sort=${sortOrder}`;
       if (filterCategory !== 'All Categories') {
