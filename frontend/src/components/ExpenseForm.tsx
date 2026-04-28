@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import toast from 'react-hot-toast';
 import api from '../api';
 
 interface ExpenseFormProps {
@@ -24,12 +25,10 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onExpenseAdded }) => {
   const [idempotencyKey, setIdempotencyKey] = useState(uuidv4());
   
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
 
     try {
       // Amount is entered in Rupees (e.g. 12.50) but must be sent as Paise (integer)
@@ -57,10 +56,11 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onExpenseAdded }) => {
       setDate('');
       setIdempotencyKey(uuidv4());
       
+      toast.success('Expense added successfully!');
       onExpenseAdded(); // Notify parent to refresh the list
     } catch (err: any) {
       // On FAILURE: The idempotencyKey remains the SAME, allowing a safe retry!
-      setError(err.response?.data?.message || 'Failed to add expense.');
+      toast.error(err.response?.data?.message || 'Failed to add expense.');
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +69,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ onExpenseAdded }) => {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-8">
       <h3 className="text-xl font-semibold mb-4 text-gray-800">Add New Expense</h3>
-      {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

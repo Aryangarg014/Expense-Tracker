@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext, useCallback } from 'react';
 import { AuthContext } from '../AuthContext';
+import toast from 'react-hot-toast';
 import api from '../api';
 import ExpenseForm from './ExpenseForm';
 
@@ -57,7 +58,7 @@ const Dashboard = () => {
       const response = await api.get(query);
       setExpenses(response.data.data.expenses);
     } catch (err: any) {
-      setError('Failed to load expenses.');
+      toast.error('Failed to load expenses.');
     } finally {
       setIsLoading(false);
     }
@@ -72,16 +73,16 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm px-6 py-4 flex justify-between items-center mb-8 border-b-4 border-blue-500">
+      <nav className="bg-gray-900 shadow-lg px-6 py-4 flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
-            Expense Tracker
+          <h1 className="text-3xl font-extrabold text-white tracking-tight">
+            Expense <span className="text-emerald-400">Tracker</span>
           </h1>
-          <p className="text-sm font-medium text-gray-500 mt-1">Welcome back, {user?.name}</p>
+          <p className="text-sm font-medium text-gray-300 mt-1">Welcome back, {user?.name}</p>
         </div>
         <button
           onClick={logout}
-          className="text-red-600 font-bold px-5 py-2 border-2 border-red-200 rounded-lg hover:bg-red-50 hover:border-red-600 transition-all"
+          className="text-white bg-red-600 hover:bg-red-700 font-semibold px-5 py-2 rounded-lg transition-colors duration-200 shadow-sm"
         >
           Logout
         </button>
@@ -94,10 +95,8 @@ const Dashboard = () => {
             <h2 className="text-lg font-semibold opacity-90">Total Expenses</h2>
             <p className="text-4xl font-extrabold mt-1">₹{totalExpenses.toFixed(2)}</p>
           </div>
-          <div className="bg-white/20 p-4 rounded-full">
-            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
+          <div className="bg-white/20 w-14 h-14 rounded-full flex items-center justify-center">
+            <span className="text-white text-3xl font-bold">₹</span>
           </div>
         </div>
 
@@ -128,8 +127,6 @@ const Dashboard = () => {
               </select>
             </div>
           </div>
-          
-          {error && <div className="text-red-600 mb-4 font-medium bg-red-50 p-3 rounded">{error}</div>}
           
           {isLoading ? (
             <div className="text-center py-12 text-gray-500 font-medium animate-pulse">Loading expenses...</div>
