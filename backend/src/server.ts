@@ -9,6 +9,7 @@ import connectDB from './config/db';
 import { globalErrorHandler } from './middleware/errorHandler';
 import { AppError } from './utils/AppError';
 import healthRouter from './routes/health';
+import authRouter from './routes/auth';
 
 // ─── App Setup ────────────────────────────────────────────────────────────────
 const app: Application = express();
@@ -39,7 +40,7 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 app.use('/api/health', healthRouter);
-// Phase 3 will add: app.use('/api/auth',     authRouter);
+app.use('/api/auth', authRouter);
 // Phase 4 will add: app.use('/api/expenses', expenseRouter);
 
 // ─── 404 Handler ─────────────────────────────────────────────────────────────
