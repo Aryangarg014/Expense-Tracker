@@ -1,4 +1,4 @@
-# Expense Tracker (MERN Stack)
+# Expense Tracker
 
 A robust, production-ready full-stack Expense Tracker built to gracefully handle real-world network instability, ensure strict financial data correctness, and provide a seamless user experience.
 
